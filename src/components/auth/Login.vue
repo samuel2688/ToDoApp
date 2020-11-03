@@ -24,14 +24,15 @@
       </div>
 
       <div class="login-form p-5 w-25">
-        <form action="/examples/actions/confirmation.php" method="post">
+        <form @submit.prevent>
           <h2 class="text-center">App login</h2>
           <div class="form-group pt-2">
             <input
               type="text"
               class="form-control"
-              placeholder="Username"
+              placeholder="Email Address"
               required="required"
+              v-model="form.email"
             />
           </div>
           <div class="form-group ">
@@ -40,10 +41,15 @@
               class="form-control"
               placeholder="Password"
               required="required"
+              v-model="form.password"
             />
           </div>
           <div class="form-group">
-            <button type="submit" class="btn btn-primary btn-block">
+            <button
+              @click="loginUser"
+              type="submit"
+              class="btn btn-primary btn-block"
+            >
               Log in
             </button>
           </div>
@@ -56,96 +62,34 @@
   </div>
 </template>
 <script>
-import axios from "axios";
 export default {
-  name: "App",
   data() {
     return {
-      id: ``,
-      todos: [],
-      form: { name: "", description: "", id: `` },
-      name: "",
-      description: "",
-      route: "/api/todos/",
-      edit: false,
-      currentTask: {},
-      creating: false,
-      showCreate: true,
-      info: null,
-      main: "",
+      user: {},
+      route: "/api/login",
+      form: {},
+      token: localStorage.getItem("token"),
+      state: this.$store.state.app,
     };
   },
 
-  mounted() {
-    this.getWeather();
-    this.getTodos();
+  created() {
+    if (this.token) {
+      this.$router.push({ name: "todo" });
+    }
   },
   methods: {
-    getWeather() {
-      axios
-        .get(
-          `https://api.openweathermap.org/data/2.5/weather?q=jacksonville,fl,USA&units=imperial&appid=242d99ffa001312d6a244d0d2fb4e5f4`
-        )
-        .then((res) => (this.info = res.data));
-    },
-
-    getTodos() {
-      axios
-        .get(this.route)
-        .then(({ data }) => {
-          this.todos = [...data];
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    getCurrentTask(todos) {
-      this.currentTask = { ...todos };
-    },
-    createtodos() {
-      axios
+    loginUser() {
+      this.$axios
         .post(this.route, this.form)
-
-        .then(() => {
-          this.getTodos();
-          this.form = {};
-          this.creating = false;
-          this.showCreate = true;
+        .then(({ data }) => {
+          localStorage.setItem("token", data.token);
+          this.$store.dispatch("app/setToken", data.token);
+          this.$router.push({ name: "todo" });
         })
 
         .catch((e) => {
-          console.log(e);
-        });
-    },
-
-    deletetodos(id) {
-      axios
-        .delete(this.route + id)
-
-        .then((result) => {
-          console.log(result);
-          this.getTodos();
-          this.form = {};
-        })
-
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    updatetodos(id) {
-      axios
-        .put(this.route + id, {
-          name: this.currentTask.name,
-          description: this.currentTask.description,
-        })
-        .then((result) => {
-          console.log(result);
-          this.getTodos();
-          this.edit = false;
-          this.showCreate = true;
-        })
-
-        .catch((e) => {
+          console.log(this);
           console.log(e);
         });
     },

@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid" v-if="tokenIsPresent">
     <div class="row">
       <!-- Top Navigation bar -->
       <nav class="navbar col-12 navbar-light bg-light ">
@@ -185,7 +185,6 @@
 </template>
 
 <script>
-import axios from "axios";
 export default {
   name: "App",
   data() {
@@ -202,24 +201,31 @@ export default {
       showCreate: true,
       info: null,
       main: "",
+      activeTodo: null,
+      state: this.$store.state.app,
     };
   },
 
-  mounted() {
-    this.getWeather();
+  created() {
     this.getTodos();
   },
-  methods: {
-    getWeather() {
-      axios
-        .get(
-          `https://api.openweathermap.org/data/2.5/weather?q=jacksonville,fl,USA&units=imperial&appid=242d99ffa001312d6a244d0d2fb4e5f4`
-        )
-        .then((res) => (this.info = res.data));
+
+  computed: {
+    tokenIsPresent() {
+      return this.$store.getters["app/activeToken"] !== null;
     },
+  },
+  methods: {
+    // getWeather() {
+    //   axios
+    //     .get(
+    //       `https://api.openweathermap.org/data/2.5/weather?q=jacksonville,fl,USA&units=imperial&appid=242d99ffa001312d6a244d0d2fb4e5f4`
+    //     )
+    //     .then((res) => (this.info = res.data));
+    // },
 
     getTodos() {
-      axios
+      this.$axios
         .get(this.route)
         .then(({ data }) => {
           this.todos = [...data];
@@ -232,7 +238,7 @@ export default {
       this.currentTask = { ...todos };
     },
     createtodos() {
-      axios
+      this.$axios
         .post(this.route, this.form)
 
         .then(() => {
@@ -248,7 +254,7 @@ export default {
     },
 
     deletetodos(id) {
-      axios
+      this.$axios
         .delete(this.route + id)
 
         .then((result) => {
@@ -262,7 +268,7 @@ export default {
         });
     },
     updatetodos(id) {
-      axios
+      this.$axios
         .put(this.route + id, {
           name: this.currentTask.name,
           description: this.currentTask.description,

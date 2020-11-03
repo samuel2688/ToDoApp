@@ -3,6 +3,15 @@
     ><router-view></router-view>
   </transition>
 </template>
+
+<script>
+export default {
+  async created() {
+    await this.$store.dispatch("app/init");
+  },
+};
+</script>
+
 <style>
 .fade-enter-active,
 .fade-leave-active {

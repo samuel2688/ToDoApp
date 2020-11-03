@@ -13,8 +13,21 @@
           </strong>
         </div>
       </nav>
+      <div v-if="success" class="row" id="body">
+        <div class="card mb-5 mx-auto align-self-center" style="width: 26rem; ">
+          <div>
+            <i id="check" class="checkmark">✓</i>
+          </div>
+          <h1 id="success">Success</h1>
+          <p id="successCreated">
+            User has been created.<br />
+            You will be redirected to the login screen shortly
+          </p>
+        </div>
+      </div>
     </div>
     <div
+      v-if="showForm"
       id="welcome-content"
       class="pb-5 pt- row d-flex justify-content-center align-items-center flex-column"
     >
@@ -30,7 +43,7 @@
                 </h3>
               </div>
               <div class="panel-body">
-                <form role="form">
+                <form @submit.prevent role="form">
                   <div class="row">
                     <div class="col-xs-6 col-sm-6 col-md-6">
                       <div class="form-group">
@@ -73,6 +86,7 @@
                     <div class="col-xs-6 col-sm-6 col-md-6">
                       <div class="form-group">
                         <input
+                          v-model="form.age"
                           type="number"
                           name="age"
                           id="age"
@@ -110,7 +124,6 @@
                   </div>
 
                   <input
-                    @submit.prevent
                     @click="createUser"
                     type="submit"
                     value="Register"
@@ -128,6 +141,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import axios from "axios";
 export default {
@@ -135,14 +149,20 @@ export default {
     return {
       form: {},
       route: "/api/register",
+      success: false,
+      showForm: true,
     };
   },
+
   methods: {
     createUser() {
       axios
         .post(this.route, this.form)
         .then(() => {
           console.log("success");
+        })
+        .then(() => {
+          setTimeout(this.$router.push({ name: "login" }), 8000);
         })
         .catch((e) => {
           console.log(e);
@@ -174,5 +194,39 @@ table {
 
 #welcome-content {
   color: white;
+}
+
+#body {
+  background-image: url(https://cdn.wallpapersafari.com/64/26/fDOZxE.png);
+  height: 100vh;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  text-align: center;
+  width: 100%;
+}
+#success {
+  color: #88b04b;
+  font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+  font-weight: 900;
+  font-size: 40px;
+}
+#successCreated {
+  color: #404f5e;
+  font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+  font-size: 20px;
+}
+#check {
+  color: #9abc66;
+  font-size: 100px;
+  line-height: 200px;
+  margin-left: -15px;
+}
+.card {
+  background: white;
+  padding: 60px;
+  border-radius: 4px;
+  box-shadow: 0 2px 3px #c8d0d8;
 }
 </style>
